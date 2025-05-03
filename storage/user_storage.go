@@ -62,7 +62,13 @@ values ($1, $2, $3, $4, $5) returning id;`
 }
 
 func (s *UserStorage) updateProfile(user *socnetwork.User) error {
-	q := `UPDATE users SET firstName = $1, lastName = $2, phone = $3, email = $4,  WHERE id = $5`
+	q := `UPDATE users SET 
+    firstName = :firstName, 
+    lastName = :lastName, 
+    phone = :phone, 
+    email = :email,
+    password = COALESCE(:password, password)
+	WHERE id = :id`
 	_, err := s.DB.Exec(q, user.FirstName, user.LastName, user.Phone, user.Email, user.ID)
 	if err != nil {
 		return fmt.Errorf("ошибка запроса: %w", err)
