@@ -15,7 +15,7 @@ import (
 func main() {
 	logger := slog.Default()
 
-	// временный хардкод для разработки
+	// TODO Лучше вынести в отдельную функцию конфигурации для управления настройками приложения
 	pgURL := os.Getenv("POSTGRES_CONN")
 	if pgURL == "" {
 		pgURL = "postgres://user:password@localhost:5432/mydb?sslmode=disable"
@@ -30,6 +30,7 @@ func main() {
 		_ = db.Close()
 	}()
 
+	// TODO добавить проверку соединения с БД, например db.Ping()
 	serverAddress := os.Getenv("SERVER_ADDRESS")
 	if serverAddress == "" {
 		serverAddress = "localhost:8080"
@@ -47,6 +48,7 @@ func main() {
 
 	s := api.NewServer(serverAddress, logger)
 
+	// TODO Можно добавить graceful shutdown через signal.Notify
 	err = s.Start()
 	if err != nil {
 		logger.Error("server has been stopped", "error", err)
