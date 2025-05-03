@@ -15,6 +15,8 @@ type Credentials struct {
 // jwt.RegisteredClaims встроен так как там есть время экспирации
 type Claims struct {
 	Login string `json:"username"`
-	Tag   string `json:"tag"` // тут хеш пароля что обеспечит деактивацию токена при смене пароля
+	Tag   string `json:"tag"`
+	// тут хеш пароля что обеспечит деактивацию токена при смене пароля
+	// что такое jwt - нет в импортах
 	jwt.RegisteredClaims
 }
