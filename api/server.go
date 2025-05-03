@@ -89,7 +89,7 @@ func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := s.users.GetUserByPhone(credentials.Login)
+	user, err := s.users.GetUserByPhone(credentials.Phone)
 	if err != nil {
 		if errors.Is(err, socnetwork.ErrUserNotFound) {
 			LogicError(w, http.StatusUnauthorized, err.Error())
@@ -106,7 +106,7 @@ func (s *Server) signIn(w http.ResponseWriter, r *http.Request) {
 
 	expirationTime := time.Now().Add(12 * time.Hour)
 	claims := &Claims{
-		Login: credentials.Login,
+		Phone: credentials.Phone,
 		Tag:   string(user.Password),
 		RegisteredClaims: jwt.RegisteredClaims{
 			// In JWT, the expiry time is expressed as unix milliseconds
@@ -152,7 +152,7 @@ func (s *Server) authByToken(r *http.Request) (*socnetwork.User, error) {
 		return nil, errors.New("токен истек")
 	}
 
-	user, er := s.users.GetUserByPhone(claims.Login)
+	user, er := s.users.GetUserByPhone(claims.Phone)
 	if er != nil {
 		return nil, fmt.Errorf("не смог получить пользователя указанного в токене: %w", er)
 	}
