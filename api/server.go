@@ -4,15 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/gorilla/handlers"
-	"golang.org/x/crypto/bcrypt"
 	"log/slog"
 	"net/http"
 	"project/socnetwork"
 	"project/storage"
 	"strings"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/gorilla/handlers"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Server struct {
@@ -141,6 +142,7 @@ func (s *Server) authByToken(r *http.Request) (*socnetwork.User, error) {
 	tkn, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (any, error) {
 		return JWTSecretKey, nil
 	})
+	// коментарий про неправильное написание токен это хорошо, но неуместен
 	if err != nil {
 		if errors.Is(err, jwt.ErrSignatureInvalid) { // токен неправильно подписан, возможно подделка
 			return nil, err
