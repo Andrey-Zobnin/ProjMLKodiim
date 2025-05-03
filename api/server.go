@@ -142,9 +142,8 @@ func (s *Server) authByToken(r *http.Request) (*socnetwork.User, error) {
 	tkn, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (any, error) {
 		return JWTSecretKey, nil
 	})
-	// коментарий про неправильное написание токен это хорошо, но неуместен
 	if err != nil {
-		if errors.Is(err, jwt.ErrSignatureInvalid) { // токен неправильно подписан, возможно подделка
+		if errors.Is(err, jwt.ErrSignatureInvalid) {
 			return nil, err
 		}
 		return nil, fmt.Errorf("не смог распарсить токен: %w", err)
