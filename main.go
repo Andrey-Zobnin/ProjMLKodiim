@@ -8,17 +8,18 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 
-	"kodIIm_bootcamp/api"
-	"kodIIm_bootcamp/storage"
+	"project/api"
+	"project/storage"
 )
 
 func main() {
 	logger := slog.Default()
 
+	// временный хардкод для разработки
 	pgURL := os.Getenv("POSTGRES_CONN")
 	if pgURL == "" {
-		logger.Error("missed POSTGRES_CONN env")
-		os.Exit(1)
+		pgURL = "postgres://user:password@localhost:5432/mydb?sslmode=disable"
+		logger.Warn("using hardcoded POSTGRES_CONN for development")
 	}
 
 	db, err := sqlx.Connect("pgx", pgURL)
@@ -31,11 +32,16 @@ func main() {
 
 	serverAddress := os.Getenv("SERVER_ADDRESS")
 	if serverAddress == "" {
-		logger.Error("missed SERVER_ADDRESS env var")
-		os.Exit(1)
+		serverAddress = "localhost:8080"
+		logger.Warn("using hardcoded SERVER_ADDRESS for development")
 	}
 
-	api.JWTSecretKey = []byte(os.Getenv("RANDOM_SECRET"))
+	secret := os.Getenv("RANDOM_SECRET")
+	if secret == "" {
+		secret = "mydevelopmentsecret"
+		logger.Warn("using hardcoded RANDOM_SECRET for development")
+	}
+	api.JWTSecretKey = []byte(secret)
 
 	storage.SetPostgres(db)
 

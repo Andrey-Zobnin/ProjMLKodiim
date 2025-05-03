@@ -1,4 +1,4 @@
-module kodIIm_bootcamp
+module project
 
 go 1.23
 

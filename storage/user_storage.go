@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jmoiron/sqlx"
 
-	"kodIIm_bootcamp/socnetwork"
+	"project/socnetwork"
 )
 
 type UserStorage struct {
@@ -16,18 +16,27 @@ type UserStorage struct {
 }
 
 func (s *UserStorage) Migrate() error {
-	const q = `CREATE TABLE IF NOT EXISTS users(
-    id serial, firstName text, lastName text, password text, email text, phone text;
-
-create unique index if not exists "users_lower(email)_uindex"
-    on users (lower(email));
-create unique index if not exists "users_phone_uindex"
-    on users (phone);
-`
-	_, err := s.DB.Exec(q)
-	if err != nil {
-		return fmt.Errorf("oшибка запроса: %w", err)
+	queries := []string{
+		`CREATE TABLE IF NOT EXISTS users (
+			id serial PRIMARY KEY,
+			firstName text,
+			lastName text,
+			password text,
+			email text,
+			phone text
+		)`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS users_lower_email_uindex
+			ON users (lower(email))`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS users_phone_uindex
+			ON users (phone)`,
 	}
+
+	for _, q := range queries {
+		if _, err := s.DB.Exec(q); err != nil {
+			return fmt.Errorf("ошибка запроса (%q): %w", q, err)
+		}
+	}
+
 	return nil
 }
 

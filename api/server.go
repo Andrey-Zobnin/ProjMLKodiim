@@ -7,10 +7,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/handlers"
 	"golang.org/x/crypto/bcrypt"
-	"kodIIm_bootcamp/socnetwork"
-	"kodIIm_bootcamp/storage"
 	"log/slog"
 	"net/http"
+	"project/socnetwork"
+	"project/storage"
 	"strings"
 	"time"
 )
@@ -41,7 +41,7 @@ func (s *Server) Start() error {
 	router.HandleFunc("GET /api/me/profile", s.myProfile)
 	router.HandleFunc("GET /api/profiles/{login}", s.profileByPhone)
 	router.HandleFunc("POST /api/me/updatePassword", s.updatePassword)
-	router.HandleFunc("POST /api/me/question", s.question)
+	//router.HandleFunc("POST /api/me/question", s.question)
 
 	s.logger.Info("server has been started", "address", s.address)
 
@@ -223,34 +223,34 @@ func (s *Server) updatePassword(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, &response)
 }
 
-func (s *Server) question(w http.ResponseWriter, r *http.Request) {
-	user, err := s.authByToken(r)
-	if err != nil {
-		LogicError(w, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	type Request struct {
-		username string
-		text     string
-	}
-	var request Request
-	err = json.NewDecoder(r.Body).Decode(&request)
-	if err != nil {
-		BadRequest(w, err.Error())
-		return
-	}
-	err = s.users.SendRequest(user, socnetwork.SendRequestParams(request))
-	if err != nil {
-		if errors.Is(err, socnetwork.ErrInvalidPassword) {
-			LogicError(w, http.StatusForbidden, socnetwork.ErrInvalidPassword.Error())
-			return
-		}
-		if errors.Is(err, socnetwork.ErrMismatchPassword) {
-			LogicError(w, http.StatusForbidden, socnetwork.ErrMismatchPassword.Error())
-			return
-		}
-		InternalError(w, s.logger, err)
-		return
-	}
-}
+//func (s *Server) question(w http.ResponseWriter, r *http.Request) {
+//	user, err := s.authByToken(r)
+//	if err != nil {
+//		LogicError(w, http.StatusUnauthorized, err.Error())
+//		return
+//	}
+//
+//	type Request struct {
+//		username string
+//		text     string
+//	}
+//	var request Request
+//	err = json.NewDecoder(r.Body).Decode(&request)
+//	if err != nil {
+//		BadRequest(w, err.Error())
+//		return
+//	}
+//	err = s.users.SendRequest(user, socnetwork.SendRequestParams(request))
+//	if err != nil {
+//		if errors.Is(err, socnetwork.ErrInvalidPassword) {
+//			LogicError(w, http.StatusForbidden, socnetwork.ErrInvalidPassword.Error())
+//			return
+//		}
+//		if errors.Is(err, socnetwork.ErrMismatchPassword) {
+//			LogicError(w, http.StatusForbidden, socnetwork.ErrMismatchPassword.Error())
+//			return
+//		}
+//		InternalError(w, s.logger, err)
+//		return
+//	}
+//}
