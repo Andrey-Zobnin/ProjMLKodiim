@@ -40,7 +40,7 @@ func (s *Server) Start() error {
 	router.HandleFunc("POST /api/auth/register", s.registerUser)
 	router.HandleFunc("POST /api/auth/sign-in", s.signIn)
 	router.HandleFunc("GET /api/me/profile", s.myProfile)
-	router.HandleFunc("GET /api/profiles/{login}", s.profileByPhone)
+	router.HandleFunc("GET /api/profiles/{phone}", s.profileByPhone)
 	router.HandleFunc("POST /api/me/updatePassword", s.updatePassword)
 	//router.HandleFunc("POST /api/me/question", s.question)
 

@@ -122,21 +122,21 @@ func IsValidRawPassword(value string) bool {
 }
 
 func IsValidEmail(email string) bool {
-	return len(email) <= 50 && len(email) > 0
+	return email == "" || len(email) <= 50 && len(email) > 0
 }
 
 func IsValidFirstName(firstName string) bool {
-	return len(firstName) <= 50 && len(firstName) > 1
+	return firstName == "" || len(firstName) <= 50 && len(firstName) > 1
 }
 
 func IsValidSecondName(secondName string) bool {
-	return len(secondName) <= 50 && len(secondName) > 1
+	return secondName == "" || len(secondName) <= 50 && len(secondName) > 1
 }
 
 var validPhone = regexp.MustCompile(`^\+\d{1,19}$`)
 
 func IsValidPhone(phone string) bool {
-	return phone == "" || validPhone.MatchString(phone)
+	return validPhone.MatchString(phone)
 }
 
 func IsValidDate(birthday string) bool {
