@@ -9,13 +9,13 @@ import (
 )
 
 type Profile struct {
-	Phone string `json:"phone,omitempty"` // <= 20 characters \+[\d]+
+	Phone string `json:"phone"` // <= 20 characters \+[\d]+
 
 	// ниже обновляемые поля
-	Email     string `json:"email"`     // [ 1 .. 50 ] characters
-	FirstName string `json:"firstName"` // [ 1 .. 50 ] characters
-	LastName  string `json:"lastName"`  // [ 1 .. 50 ] characters
-	Birthday  string `json:"birthday"`  // дд.мм.гггг
+	Email     string `json:"email,omitempty"`     // [ 1 .. 50 ] characters
+	FirstName string `json:"firstName,omitempty"` // [ 1 .. 50 ] characters
+	LastName  string `json:"lastName,omitempty"`  // [ 1 .. 50 ] characters
+	Birthday  string `json:"birthday,omitempty"`  // дд.мм.гггг
 }
 
 type User struct {

@@ -8,8 +8,8 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 
-	"kodIIm_bootcamp/api"
-	"kodIIm_bootcamp/storage"
+	"project/api"
+	"project/storage"
 )
 
 func main() {

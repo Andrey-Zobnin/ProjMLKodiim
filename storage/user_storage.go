@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jmoiron/sqlx"
 
-	"kodIIm_bootcamp/socnetwork"
+	"project/socnetwork"
 )
 
 type UserStorage struct {
