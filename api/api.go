@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+// TODO: Заменить panic в writeJSON на логирование ошибки
+
 func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -15,6 +17,7 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	}
 }
 
+// TODO: Объединить InternalError и LogicError в единый тип API-ошибки
 func InternalError(w http.ResponseWriter, l *slog.Logger, err error) {
 	if l != nil {
 		l.Error(err.Error())
