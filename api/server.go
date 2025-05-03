@@ -37,11 +37,11 @@ func (s *Server) Start() error {
 	router := http.NewServeMux()
 
 	router.HandleFunc("GET /api/ping", s.handlePing)
-	router.HandleFunc("POST /api/auth/register", s.registerUser)
-	router.HandleFunc("POST /api/auth/sign-in", s.signIn)
-	router.HandleFunc("GET /api/me/profile", s.myProfile)
-	router.HandleFunc("GET /api/profiles/{phone}", s.profileByPhone)
-	router.HandleFunc("POST /api/me/updatePassword", s.updatePassword)
+	router.HandleFunc("POST /api/auth/register", s.registerUser)       // JSON: phone, password; email, firstName, lastName, birthday
+	router.HandleFunc("POST /api/auth/sign-in", s.signIn)              // JSON: phone, password
+	router.HandleFunc("GET /api/me/profile", s.myProfile)              // JSON: требует ток Bearer Token для авторизации
+	router.HandleFunc("GET /api/profiles/{phone}", s.profileByPhone)   // JSON: требует номер телефона
+	router.HandleFunc("POST /api/me/updatePassword", s.updatePassword) // JSON: oldPassword, newPassword
 	//router.HandleFunc("POST /api/me/question", s.question)
 
 	s.logger.Info("server has been started", "address", s.address)
