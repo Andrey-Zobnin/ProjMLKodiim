@@ -27,6 +27,7 @@ func BadRequest(w http.ResponseWriter, reason string) {
 }
 
 func LogicError(w http.ResponseWriter, code int, reason string) {
+	// struct to response
 	type Response struct {
 		Reason string `json:"reason"`
 	}
