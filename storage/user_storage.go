@@ -69,6 +69,7 @@ func (s *UserStorage) updateProfile(user *socnetwork.User) error {
     email = :email,
     password = COALESCE(:password, password)
 	WHERE id = :id`
+
 	_, err := s.DB.Exec(q, user.FirstName, user.LastName, user.Phone, user.Email, user.ID)
 	if err != nil {
 		return fmt.Errorf("ошибка запроса: %w", err)
