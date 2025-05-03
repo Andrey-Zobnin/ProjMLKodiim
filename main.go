@@ -12,25 +12,20 @@ import (
 	"project/storage"
 )
 
-func main() {
-	logger := slog.Default()
+// Config структура для хранения конфигурации приложения
+type Config struct {
+	PostgresURL   string
+	ServerAddress string
+	JWTSecretKey  []byte
+}
 
-	// TODO Лучше вынести в отдельную функцию конфигурации для управления настройками приложения
+func loadConfig(logger *slog.Logger) Config {
 	pgURL := os.Getenv("POSTGRES_CONN")
 	if pgURL == "" {
 		pgURL = "postgres://user:password@localhost:5432/mydb?sslmode=disable"
 		logger.Warn("using hardcoded POSTGRES_CONN for development")
 	}
 
-	db, err := sqlx.Connect("pgx", pgURL)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer func() {
-		_ = db.Close()
-	}()
-
-	// TODO добавить проверку соединения с БД, например db.Ping()
 	serverAddress := os.Getenv("SERVER_ADDRESS")
 	if serverAddress == "" {
 		serverAddress = "localhost:8080"
@@ -42,11 +37,34 @@ func main() {
 		secret = "mydevelopmentsecret"
 		logger.Warn("using hardcoded RANDOM_SECRET for development")
 	}
-	api.JWTSecretKey = []byte(secret)
 
+	return Config{
+		PostgresURL:   pgURL,
+		ServerAddress: serverAddress,
+		JWTSecretKey:  []byte(secret),
+	}
+}
+
+func main() {
+	logger := slog.Default()
+
+	// Загружаем конфигурацию
+	config := loadConfig(logger)
+
+	db, err := sqlx.Connect("pgx", config.PostgresURL)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer func() {
+		_ = db.Close()
+	}()
+
+	// TODO добавить проверку соединения с БД, например db.Ping()
 	storage.SetPostgres(db)
 
-	s := api.NewServer(serverAddress, logger)
+	api.JWTSecretKey = config.JWTSecretKey
+
+	s := api.NewServer(config.ServerAddress, logger)
 
 	// TODO Можно добавить graceful shutdown через signal.Notify
 	err = s.Start()
