@@ -4234,3 +4234,5 @@ myenv/lib/python3.12/site-packages/tzdata-2025.2.dist-info/top_level.txt
 myenv/lib/python3.12/site-packages/tzdata-2025.2.dist-info/WHEEL
 myenv/lib/python3.12/site-packages/tzdata-2025.2.dist-info/licenses/LICENSE
 myenv/lib/python3.12/site-packages/tzdata-2025.2.dist-info/licenses/licenses/LICENSE_APACHE
+сertc/certs/server.crt
+сertc/certs/server.key
