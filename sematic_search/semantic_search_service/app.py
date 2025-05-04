@@ -1,10 +1,10 @@
+import json
+import pathlib
+import numpy as np
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
-import json
-import pathlib
 
 app = FastAPI(title="Semantic QA Search")
 
