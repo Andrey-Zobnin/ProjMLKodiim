@@ -1,10 +1,13 @@
 package main
 
 import (
+	"crypto/tls"
+	"fmt"
 	"log"
 	"log/slog"
+	"net/http"
 	"os"
-	"crypto/tls"
+
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 	"project/api"
@@ -14,7 +17,6 @@ import (
 func main() {
 	logger := slog.Default()
 
-	// временный хардкод для разработки
 	pgURL := os.Getenv("POSTGRES_CONN")
 	if pgURL == "" {
 		pgURL = "postgres://user:password@localhost:5432/mydb?sslmode=disable"
@@ -25,16 +27,10 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer func() {
-		_ = db.Close()
-	}()
+	defer db.Close()
+	storage.SetPostgres(db)
 
-	serverAddress := os.Getenv("SERVER_ADDRESS")
-	if serverAddress == "" {
-		serverAddress = "localhost:8080"
-		logger.Warn("using hardcoded SERVER_ADDRESS for development")
-	}
-
+	// 🛡️ JWT секрет
 	secret := os.Getenv("RANDOM_SECRET")
 	if secret == "" {
 		secret = "mydevelopmentsecret"
@@ -42,12 +38,32 @@ func main() {
 	}
 	api.JWTSecretKey = []byte(secret)
 
-	storage.SetPostgres(db)
+	// 🌐 TLS-сервер
+	serverAddress := os.Getenv("SERVER_ADDRESS")
+	if serverAddress == "" {
+		serverAddress = "localhost:8443"
+		logger.Warn("using hardcoded SERVER_ADDRESS for development")
+	}
 
 	s := api.NewServer(serverAddress, logger)
 
-	err = s.Start()
+	// TLS ключи
+	certFile := "cert/server.crt"
+	keyFile := "cert/server.key"
+
+	tlsConfig := &tls.Config{
+		MinVersion: tls.VersionTLS13,
+	}
+
+	server := &http.Server{
+		Addr:      serverAddress,
+		Handler:   s.Router,
+		TLSConfig: tlsConfig,
+	}
+
+	fmt.Println("🔐 TLS-сервер слушает на https://" + serverAddress)
+	err = server.ListenAndServeTLS(certFile, keyFile)
 	if err != nil {
-		logger.Error("server has been stopped", "error", err)
+		logger.Error("TLS сервер остановлен", "error", err)
 	}
 }
