@@ -1,3 +1,18 @@
 package socnetwork
 
-// todo нужно реализовать сервис семантического поиска вместо мл модели и сделать так чтобы оно общалось с файлом ml.go
+import (
+	"fmt"
+	"bytes"
+	"context"
+	"io"
+	"net/http"
+	"encoding/json"
+)
+
+type MlService struct {
+	PuthonEndpoint string
+}
+
+func Mlservice(endpoint string) *Mlservice {
+	return &MlService{PythonEndpoint: endpoint}
+}
