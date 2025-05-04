@@ -14,3 +14,38 @@
 - React Native для кроссплатформенной разработки
 - Redux для управления состоянием
 - Интеграция с ИИ API
+
+## описание струтуры проекта 
+- `src` - каталог с исходным кодом
+- `components` - компоненты приложения
+- `containers` - контейнеры приложения
+- `actions` - действия приложения
+- `reducers` - редюсеры приложения
+- `api` - API-интерфейс для ИИ-сервиса
+- `utils` - вспомогательные функции
+
+project/
+├── cmd/
+│   └── server/
+│       └── main.go           ← запуск приложения
+├── internal/
+│   ├── config/
+│   │   └── config.go         ← переменные окружения
+│   ├── db/
+│   │   └── postgres.go       ← подключение к PostgreSQL
+│   ├── http/
+│   │   └── server.go         ← TLS HTTP-сервер
+│   ├── crypto/
+│   │   └── aes_gcm.go        ← шифрование AES
+│   └── logger/
+│       └── logger.go         ← инициализация slog
+├── api/
+│   └── router.go             ← маршруты и хендлеры
+├── cert/
+│   └── server.crt / .key     ← TLS-сертификаты
+├── .env
+├── go.mod
+├── .gitignore
+└── README.md
+
+
