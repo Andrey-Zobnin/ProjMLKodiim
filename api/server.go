@@ -225,6 +225,7 @@ func (s *Server) updatePassword(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) message(w http.ResponseWriter, r *http.Request) {
 	user, err := s.authByToken(r)
+	//_, err := s.authByToken(r)
 	if err != nil {
 		LogicError(w, http.StatusUnauthorized, err.Error())
 		return
@@ -239,19 +240,19 @@ func (s *Server) message(w http.ResponseWriter, r *http.Request) {
 		BadRequest(w, err.Error())
 		return
 	}
+	print(request.text)
 
-	// TODO: сделать отправление JSONчика млщику
-	//err = s.users.SendRequest(user, socnetwork.SendRequestParams(request))
-	//if err != nil {
-	//	if errors.Is(err, socnetwork.ErrInvalidPassword) {
-	//		LogicError(w, http.StatusForbidden, socnetwork.ErrInvalidPassword.Error())
-	//		return
-	//	}
-	//	if errors.Is(err, socnetwork.ErrMismatchPassword) {
-	//		LogicError(w, http.StatusForbidden, socnetwork.ErrMismatchPassword.Error())
-	//		return
-	//	}
-	//	InternalError(w, s.logger, err)
-	//	return
-	//}
+	err = s.users.SendRequest(user, socnetwork.SendRequestParams(request))
+	if err != nil {
+		if errors.Is(err, socnetwork.ErrInvalidPassword) {
+			LogicError(w, http.StatusForbidden, socnetwork.ErrInvalidPassword.Error())
+			return
+		}
+		if errors.Is(err, socnetwork.ErrMismatchPassword) {
+			LogicError(w, http.StatusForbidden, socnetwork.ErrMismatchPassword.Error())
+			return
+		}
+		InternalError(w, s.logger, err)
+		return
+	}
 }
