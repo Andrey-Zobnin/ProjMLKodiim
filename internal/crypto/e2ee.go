@@ -9,8 +9,6 @@ import (
     "io"
 )
 
-
-
 func EncryptAESGCM(plaintext, keyB64 string) (string, error) {
     key, err := base64.StdEncoding.DecodeString(keyB64)
     if err != nil {
@@ -34,4 +32,32 @@ func EncryptAESGCM(plaintext, keyB64 string) (string, error) {
 
     ciphertext := aesgcm.Seal(nonce, nonce, []byte(plaintext), nil)
     return base64.StdEncoding.EncodeToString(ciphertext), nil
+}
+
+func DecryptAESGCM(ciphertextB64, keyB64 string) (string, error) {
+    ciphertext, _ := base64.StdEncoding.DecodeString(ciphertextB64)
+    key, _ := base64.StdEncoding.DecodeString(keyB64)
+
+    block, err := aes.NewCipher(key)
+    if err != nil {
+        return "", err
+    }
+
+    aesgcm, err := cipher.NewGCM(block)
+    if err != nil {
+        return "", err
+    }
+
+    nonceSize := aesgcm.NonceSize()
+    if len(ciphertext) < nonceSize {
+        return "", errors.New("ciphertext too short")
+    }
+
+    nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
+    plaintext, err := aesgcm.Open(nil, nonce, ciphertext, nil)
+    if err != nil {
+        return "", err
+    }
+
+    return string(plaintext), nil
 }
