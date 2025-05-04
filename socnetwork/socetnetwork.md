@@ -90,4 +90,7 @@ type SearchResult struct {
 
 - Results: массив строк, содержащий результаты поиска.
 
-## Заключение
+### описание функции RegisterUser
+- RegisterUser валидирует значения полей пользователя и сохраняет его
+- При сохранении нового пользователя назначает ему идентификатор.
+- возможные ошибки: ErrLoginAlreadyExists, ErrEmailAlreadyExists, ErrPhoneAlreadyExists, ErrInvalidUser
