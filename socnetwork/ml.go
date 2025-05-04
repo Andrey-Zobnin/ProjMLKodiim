@@ -60,3 +60,30 @@ func (ml *MLService) SemanticSearch(ctx context.Context, query string, topK int)
 
 	return result.Results, nil
 }
+
+func CallML(mlURL, text string) (string, error) {
+	payload := map[string]string{"text": text}
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return "", fmt.Errorf("не смог сериализовать запрос: %w", err)
+	}
+
+	resp, err := http.Post(mlURL, "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		return "", fmt.Errorf("ошибка запроса к ML: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("ml вернул ошибку: %s", resp.Status)
+	}
+
+	var response struct {
+		Result string `json:"result"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return "", fmt.Errorf("не смог декодировать ответ ML: %w", err)
+	}
+
+	return response.Result, nil
+}

@@ -224,7 +224,6 @@ func (s *Server) updatePassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) message(w http.ResponseWriter, r *http.Request) {
-	//user, err := s.authByToken(r)
 	_, err := s.authByToken(r)
 	if err != nil {
 		LogicError(w, http.StatusUnauthorized, err.Error())
@@ -232,7 +231,7 @@ func (s *Server) message(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type Request struct {
-		text string
+		Text string `json:"text"`
 	}
 	var request Request
 	err = json.NewDecoder(r.Body).Decode(&request)
@@ -240,18 +239,17 @@ func (s *Server) message(w http.ResponseWriter, r *http.Request) {
 		BadRequest(w, err.Error())
 		return
 	}
-	println(request.text)
-	//err = s.users.SendRequest(user, socnetwork.SendRequestParams(request))
+
+	// TODO: при готовности ML разкомментить
+	//mlResponse, err := socnetwork.CallML("http://localhost:5000/predict", request.Text)
 	//if err != nil {
-	//	if errors.Is(err, socnetwork.ErrInvalidPassword) {
-	//		LogicError(w, http.StatusForbidden, socnetwork.ErrInvalidPassword.Error())
-	//		return
-	//	}
-	//	if errors.Is(err, socnetwork.ErrMismatchPassword) {
-	//		LogicError(w, http.StatusForbidden, socnetwork.ErrMismatchPassword.Error())
-	//		return
-	//	}
-	//	InternalError(w, s.logger, err)
+	//	InternalError(w, s.logger, fmt.Errorf("ошибка вызова ML: %w", err))
 	//	return
 	//}
+	mlResponse := fmt.Sprintf("Заглушка ML: %s", request.Text)
+
+	type Response struct {
+		Result string `json:"result"`
+	}
+	writeJSON(w, http.StatusOK, &Response{Result: mlResponse})
 }
