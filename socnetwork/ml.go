@@ -1,9 +1,3 @@
 package socnetwork
 
-//import (
-//	"errors"
-//	"fmt"
-//	"golang.org/x/crypto/bcrypt"
-//	"regexp"
-//	"time"
-//)
+// todo нужно реализовать сервис семантического поиска вместо мл модели и сделать так чтобы оно общалось с файлом ml.go
