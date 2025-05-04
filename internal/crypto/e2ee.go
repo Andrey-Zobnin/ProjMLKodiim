@@ -6,8 +6,19 @@ import (
     "crypto/rand"
     "encoding/base64"
     "errors"
+    "fmt"
     "io"
 )
+
+// TODO уменьшить дублирование кода 
+
+func check[T any](v T, err error) (T, error) {
+    if err != nil {
+        var zero T
+        return zero, err
+    }
+    return v, nil
+}
 
 func EncryptAESGCM(plaintext, keyB64 string) (string, error) {
     key, err := base64.StdEncoding.DecodeString(keyB64)
@@ -15,12 +26,12 @@ func EncryptAESGCM(plaintext, keyB64 string) (string, error) {
         return "", err
     }
 
-    block, err := aes.NewCipher(key)
+    block, err := check(aes.NewCipher(key))
     if err != nil {
         return "", err
     }
 
-    aesgcm, err := cipher.NewGCM(block)
+    aesgcm, err := check(cipher.NewGCM(block))
     if err != nil {
         return "", err
     }
@@ -35,15 +46,22 @@ func EncryptAESGCM(plaintext, keyB64 string) (string, error) {
 }
 
 func DecryptAESGCM(ciphertextB64, keyB64 string) (string, error) {
-    ciphertext, _ := base64.StdEncoding.DecodeString(ciphertextB64)
-    key, _ := base64.StdEncoding.DecodeString(keyB64)
-
-    block, err := aes.NewCipher(key)
+    ciphertext, err := check(base64.StdEncoding.DecodeString(ciphertextB64))
     if err != nil {
         return "", err
     }
 
-    aesgcm, err := cipher.NewGCM(block)
+    key, err := check(base64.StdEncoding.DecodeString(keyB64))
+    if err != nil {
+        return "", err
+    }
+
+    block, err := check(aes.NewCipher(key))
+    if err != nil {
+        return "", err
+    }
+
+    aesgcm, err := check(cipher.NewGCM(block))
     if err != nil {
         return "", err
     }
