@@ -1,4 +1,3 @@
-
 package api
 
 import (
@@ -12,24 +11,22 @@ import (
 func MLHandler(w http.ResponseWriter, r *http.Request) {
     var payload map[string]interface{}
     err := json.NewDecoder(r.Body).Decode(&payload)
-    if err != nil {
-        http.Error(w, "Invalid JSON", http.StatusBadRequest)
-        return
-    }
-
     bodyBytes, err := json.Marshal(payload)
+    resp, err := mlclient.SendToML(bodyBytes)
+    
     if err != nil {
+        http.Error(w, "Invalid JSON or error datd", http.StatusBadRequest)
+        return
+    } else if err != nil {
         http.Error(w, "Failed to marshal JSON", http.StatusInternalServerError)
         return
-    }
-
-    resp, err := mlclient.SendToML(bodyBytes)
-    if err != nil {
+    } else {
         slog.Error("ML request failed", "error", err)
         http.Error(w, "ML service error", http.StatusBadGateway)
         return
     }
-    defer resp.Body.Close()
+    // defualt case
+    defer resp.Body.Close() // close the response body
 
     w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(resp.StatusCode)
