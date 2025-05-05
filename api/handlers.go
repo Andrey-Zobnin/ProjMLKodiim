@@ -14,21 +14,33 @@ func MLHandler(w http.ResponseWriter, r *http.Request) {
     bodyBytes, err := json.Marshal(payload)
     resp, err := mlclient.SendToML(bodyBytes)
     
-    if err != nil {
-        http.Error(w, "Invalid JSON or error datd", http.StatusBadRequest)
-        return
-    } else if err != nil {
-        http.Error(w, "Failed to marshal JSON", http.StatusInternalServerError)
-        return
-    } else {
-        slog.Error("ML request failed", "error", err)
-        http.Error(w, "ML service error", http.StatusBadGateway)
+    // Check if the response is valid
+    if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+        slog.Error("Invalid JSON payload", "error", err)
+        
+        http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
         return
     }
-    // defualt case
+    slog.Info("Received payload", "payload", payload)
+    if err != nil {
+        slog.Error("Failed to marshal payload", "error", err)
+        http.Error(w, "Failed to process payload", http.StatusInternalServerError)
+        return
+    }
+    slog.Info("Sending payload to ML", "payload", payload)
+    // Send the payload to the ML service
+    if err != nil {
+        slog.Error("Failed to read ML response body", "error", err)
+        http.Error(w, "Failed to read ML response", http.StatusInternalServerError)
+        return
+    }
+    
+    slog.Info("Received response from ML", "status", resp.StatusCode, "response", string(responseBody))
     defer resp.Body.Close() // close the response body
 
+    // Отдаём клиенту
     w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(resp.StatusCode)
-    io.Copy(w, resp.Body)
+    io.Copy(w, bytes.NewReader(responseBody))
+
 }
