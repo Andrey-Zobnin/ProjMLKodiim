@@ -1,18 +1,21 @@
-transformers>=4.39
-peft>=0.10
-bitsandbytes>=0.43
-datasets>=2.18
-sentence-transformers>=2.5
-qdrant-client>=1.9
-fastapi>=0.110
-uvicorn[standard]>=0.29
+torch==2.7.0
+transformers==4.43.0
+sentence-transformers==4.1.0
+bitsandbytes==0.45.5
+peft==0.10.0
 
-langfuse~=2.1
+qdrant-client==1.14.2
+fastembed==0.6.1
+rank-bm25==0.2.2
+datasets~=2.18
 
-torch~=2.7.0
-pandas~=2.2.3
-scikit-learn~=1.6.1
-pymorphy2~=0.9.1
-fastembed~=0.6.1
-docker~=7.1.0
-rank-bm25~=0.2.2
+fastapi[standard]==0.110.2
+uvicorn[standard]==0.29.0
+langfuse==2.60.3
+
+pandas==2.2.3
+scikit-learn==1.6.1
+pymorphy2==0.9.1
+
+
+fastembed

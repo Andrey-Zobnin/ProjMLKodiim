@@ -1,0 +1,16 @@
+# исключаем корневые каталоги вашего репо
+../../.venv
+../../output-ce-finetuned
+../../proj
+../../socnetwork
+../../qdrant_data
+../../storage
+../../.idea
+../../*.rar
+../../*.ipynb
+../../*.xlsx
+../../*.go
+../../start_qdrant.py
+../../finetune_cross_encoder.py
+../../test.py
+../../chatbot.py

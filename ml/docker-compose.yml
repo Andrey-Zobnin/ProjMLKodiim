@@ -1,0 +1,25 @@
+version: "3.10"
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant_instance
+    volumes:
+      - ./qdrant_data:/qdrant/storage
+    ports: ["6333:6333"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:6333/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  api:
+    build:
+      context: .          # ← берётся только каталог ml
+      dockerfile: Dockerfile
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    environment:
+      - QDRANT__URL=http://qdrant:6333
+    ports: ["8000:80"]
