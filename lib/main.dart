@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'models/message.dart';
+import 'services/api_service.dart';
 
 void main() {
   // Установка белого фона и тёмных иконок
@@ -161,59 +163,62 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildTextComposer(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 16),
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surface,
+      borderRadius: BorderRadius.circular(24),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          blurRadius: 4,
+          offset: const Offset(0, -2),
+        ),
+      ],
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        children: [
+          Flexible(
+            child: TextField(
+              controller: _textController,
+              keyboardType: TextInputType.multiline,
+              minLines: 1,        // Минимум в 1 строку
+              maxLines: 5,        // Расширяется до 5 строк, затем скролл
+              decoration: InputDecoration(
+                hintText: 'Отправить сообщение',
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              onChanged: (text) =>
+                  setState(() => _isComposing = text.isNotEmpty),
+              // при многострочном вводе onSubmitted не вызывается, но мы отправляем по кнопке
+            ),
+          ),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              color: _isComposing
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.grey.withOpacity(0.3),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.send, color: Colors.white),
+              onPressed: _isComposing
+                  ? () => _handleSubmitted(_textController.text)
+                  : null,
+            ),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Row(
-          children: [
-            Flexible(
-              child: TextField(
-                controller: _textController,
-                decoration: InputDecoration(
-                  hintText: 'Отправить сообщение',
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                ),
-                onChanged: (text) =>
-                    setState(() => _isComposing = text.isNotEmpty),
-                onSubmitted: _isComposing ? _handleSubmitted : null,
-              ),
-            ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              decoration: BoxDecoration(
-                color: _isComposing
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.grey.withOpacity(0.3),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.send, color: Colors.white),
-                onPressed: _isComposing
-                    ? () => _handleSubmitted(_textController.text)
-                    : null,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+    ),
+  );
+}
 
-  void _handleSubmitted(String text) {
+  void _handleSubmitted(String text) async {
     _textController.clear();
     setState(() {
       _isComposing = false;
@@ -231,12 +236,27 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     });
     _scrollToBottom();
 
-    Future.delayed(const Duration(milliseconds: 500), () {
+    try {
+      if (text.trim().isEmpty) {
+        throw Exception('Сообщение не может быть пустым');
+      }
+
+      final message = Message(text: text.trim());
+      final response = await ApiService.sendMessage(message);
+      
+      if (response == null) {
+        throw Exception('Не удалось получить ответ от сервера');
+      }
+      
+      if (response.text.trim().isEmpty) {
+        throw Exception('Получен пустой ответ от сервера');
+      }
+      
       setState(() {
         _messages.insert(
           0,
           ChatMessage(
-            text: 'Это тестовый ответ от ассистента',
+            text: response.text,
             isUser: false,
             animationController: AnimationController(
               duration: const Duration(milliseconds: 400),
@@ -246,7 +266,22 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         );
       });
       _scrollToBottom();
-    });
+    } catch (e) {
+      // Показываем ошибку пользователю
+      final errorMessage = e.toString().replaceAll('Exception: ', '');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: 80,
+            right: 20,
+            left: 20,
+          ),
+        ),
+      );
+    }
   }
 }
 
@@ -328,8 +363,12 @@ class ChatMessage extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width * 0.75, // Ограничение ширины сообщения
+      ),
+      // Удаляем фиксированную ширину, чтобы текст мог переноситься
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color.fromARGB(255, 184, 233, 204),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -357,13 +396,27 @@ class ChatMessage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 5),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 16,
-              height: 1.4,
-              color: colorScheme.onSurface,
-            ),
+          // Обрабатываем текст сообщения, разбивая его на строки
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: text.split('\n').map((line) => 
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: Text(
+                  line,
+                  style: TextStyle(
+                    fontSize: 16,
+                    height: 1.4,
+                    color: colorScheme.onSurface,
+                  ),
+                  softWrap: true,
+                  overflow: TextOverflow.clip,
+                  textAlign: TextAlign.left,
+                  maxLines: null, // Разрешаем неограниченное количество строк
+                  textWidthBasis: TextWidthBasis.longestLine, // Используем самую длинную строку как основу для ширины
+                ),
+              )
+            ).toList(),
           ),
           const SizedBox(height: 4),
           Text(

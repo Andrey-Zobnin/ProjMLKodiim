@@ -224,14 +224,14 @@ func (s *Server) updatePassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) message(w http.ResponseWriter, r *http.Request) {
-	user, err := s.authByToken(r)
+	_, err := s.authByToken(r)
 	if err != nil {
 		LogicError(w, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	type Request struct {
-		text string
+		Text string `json:"text"`
 	}
 	var request Request
 	err = json.NewDecoder(r.Body).Decode(&request)
@@ -240,18 +240,16 @@ func (s *Server) message(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: сделать отправление JSONчика млщику
-	//err = s.users.SendRequest(user, socnetwork.SendRequestParams(request))
-	//if err != nil {
-	//	if errors.Is(err, socnetwork.ErrInvalidPassword) {
-	//		LogicError(w, http.StatusForbidden, socnetwork.ErrInvalidPassword.Error())
-	//		return
-	//	}
-	//	if errors.Is(err, socnetwork.ErrMismatchPassword) {
-	//		LogicError(w, http.StatusForbidden, socnetwork.ErrMismatchPassword.Error())
-	//		return
-	//	}
-	//	InternalError(w, s.logger, err)
-	//	return
-	//}
+	print(request.Text)
+	type Response struct {
+		Status string `json:"status"`
+		Text   string `json:"text"`
+	}
+
+	response := Response{
+		Status: "ok",
+		Text:   request.Text,
+	}
+
+	writeJSON(w, http.StatusOK, &response)
 }
