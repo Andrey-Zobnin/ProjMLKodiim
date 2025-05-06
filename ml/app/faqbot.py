@@ -43,7 +43,7 @@ COLL = "x5_faq_prod_customer_v3"
 EMB_NAME = "d0rj/e5-large-en-ru"
 Q_PREF, P_PREF = "query: ", "passage: "
 
-CE_NAME = "     "
+CE_NAME = "BAAI/bge-reranker-large"
 CE_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 CE_TOP_K = 20
 TOP_N_AFTER_CE = 3

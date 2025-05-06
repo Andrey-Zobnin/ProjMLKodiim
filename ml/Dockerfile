@@ -29,31 +29,15 @@ RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
     pip install "huggingface_hub[hf_transfer]>=0.23"
 
 #─────────────────────── 3. Скачиваем модели при build ───────────────────────────
-# многопоточный скачиватель + возобновление по умолчанию
-ENV HF_HUB_ENABLE_HF_TRANSFER=1
 
-RUN --mount=type=cache,id=hf-cache,target=/root/.cache/huggingface \
-    python - <<'PY'
-import time, logging
+
+RUN python - <<EOF
 from huggingface_hub import snapshot_download
+snapshot_download("d0rj/e5-large-en-ru")
+snapshot_download("BAAI/bge-reranker-large")
+snapshot_download("Qdrant/bm25")
+EOF
 
-models = [
-    "d0rj/e5-large-en-ru",
-    "BAAI/bge-reranker-large",
-    "Qdrant/bm25",
-]
-
-for repo in models:
-    for attempt in range(1, 8):          # до 7 попыток
-        try:
-            snapshot_download(repo, max_workers=8)   # резюме включено
-            break
-        except Exception as e:
-            logging.warning("Attempt %d for %s failed: %s", attempt, repo, e)
-            if attempt == 7:
-                raise
-            time.sleep(5 * attempt)
-PY
 
 #──────────────────────────── 4. Код приложения ─────────────────────────────────
 COPY ./app ./app
