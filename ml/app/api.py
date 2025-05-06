@@ -2,7 +2,7 @@ from typing import List
 from fastapi import FastAPI, Depends
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
-from faqbot import FAQBot
+from .faqbot import FAQBot
 
 app = FastAPI(title="FAQ Black-Box")
 

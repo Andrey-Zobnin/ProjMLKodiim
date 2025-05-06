@@ -8,7 +8,7 @@ import warnings
 from collections import namedtuple
 from typing import List, Tuple, Dict, Any
 
-import torch
+import os, torch
 import pandas as pd
 from qdrant_client import QdrantClient, models
 from qdrant_client.http.exceptions import UnexpectedResponse
@@ -43,7 +43,7 @@ COLL = "x5_faq_prod_customer_v3"
 EMB_NAME = "d0rj/e5-large-en-ru"
 Q_PREF, P_PREF = "query: ", "passage: "
 
-CE_NAME = "BAAI/bge-reranker-large"
+CE_NAME = "     "
 CE_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 CE_TOP_K = 20
 TOP_N_AFTER_CE = 3
@@ -127,8 +127,8 @@ class FAQBot:
             log.info("ℹ️ fastembed не установлен")
 
         # ④ Qdrant
-        self.qdr = QdrantClient(url="http://localhost:6333", timeout=90)
-        self._ensure_collection()
+        qdrant_url = os.getenv("QDRANT__URL", "http://qdrant:6333")
+        self.qdr = QdrantClient(url=qdrant_url, timeout=90)
 
         log.info("✅ бот готов")
 
