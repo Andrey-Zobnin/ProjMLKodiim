@@ -1,0 +1,7 @@
+__MACOSX/
+.DS_Store
+*.swp
+*.swo
+*.pyc
+*.log
+._*
