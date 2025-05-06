@@ -1,0 +1,29 @@
+
+version: "3.9"
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8081:8080"  # внешний порт 8081 -> внутренний 8080 в контейнере
+    networks:
+      - app-network
+  ml_service:
+    build: ./ml_service
+    ports:
+      - "5000:5000"
+    networks:
+      - app-network
+
+  frontend:
+    image: nginx:alpine
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
