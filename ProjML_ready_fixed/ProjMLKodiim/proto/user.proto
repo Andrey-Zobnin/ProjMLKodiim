@@ -1,0 +1,48 @@
+
+syntax = "proto3";
+
+package user;
+
+option go_package = "userpb";
+
+service UserService {
+  rpc Register (RegisterRequest) returns (AuthResponse);
+  rpc SignIn (SignInRequest) returns (AuthResponse);
+  rpc MyProfile (ProfileRequest) returns (UserProfile);
+  rpc ProfileByLogin (LoginRequest) returns (UserProfile);
+  rpc UpdatePassword (UpdatePasswordRequest) returns (UpdateResponse);
+}
+
+message RegisterRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message SignInRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message AuthResponse {
+  string token = 1;
+}
+
+message ProfileRequest {}
+
+message LoginRequest {
+  string login = 1;
+}
+
+message UpdatePasswordRequest {
+  string old_password = 1;
+  string new_password = 2;
+}
+
+message UpdateResponse {
+  bool success = 1;
+}
+
+message UserProfile {
+  string login = 1;
+  string email = 2;
+}
