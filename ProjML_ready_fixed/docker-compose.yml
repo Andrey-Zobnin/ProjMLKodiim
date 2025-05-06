@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.go
+    environment:
+      POSTGRES_CONN: postgres://user:password@db:5432/mydb?sslmode=disable
+    ports:
+      - "50051:50051"
+    depends_on:
+      - mlservice
+
+  mlservice:
+    build:
+      context: ProjMLKodiim/sematic_search/semantic_search_service
+      dockerfile: Dockerfile
+    ports:
+      - "50052:50052"
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
