@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -142,7 +143,7 @@ func (s *Server) authByToken(r *http.Request) (*socnetwork.User, error) {
 		return JWTSecretKey, nil
 	})
 	if err != nil {
-		if errors.Is(err, jwt.ErrSignatureInvalid) { // токен неправильно подписан, возможно подделка
+		if errors.Is(err, jwt.ErrSignatureInvalid) {
 			return nil, err
 		}
 		return nil, fmt.Errorf("не смог распарсить токен: %w", err)
@@ -224,32 +225,65 @@ func (s *Server) updatePassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) message(w http.ResponseWriter, r *http.Request) {
-	_, err := s.authByToken(r)
-	if err != nil {
-		LogicError(w, http.StatusUnauthorized, err.Error())
-		return
-	}
-
 	type Request struct {
 		Text string `json:"text"`
 	}
 	var request Request
-	err = json.NewDecoder(r.Body).Decode(&request)
+
+	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		BadRequest(w, err.Error())
 		return
 	}
 
-	print(request.Text)
-	type Response struct {
+	mlURL := "http://localhost:9000/ask"
+
+	// Подготовка тела запроса
+	payload := map[string]string{"text": request.Text}
+	body, err := json.Marshal(payload)
+	if err != nil {
+		InternalError(w, s.logger, fmt.Errorf("не смог сериализовать запрос к ML: %w", err))
+		return
+	}
+
+	// Отправка POST-запроса
+	resp, err := http.Post(mlURL, "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		InternalError(w, s.logger, fmt.Errorf("ошибка запроса к ML: %w", err))
+		return
+	}
+	defer resp.Body.Close()
+
+	// Проверка кода ответа
+	if resp.StatusCode != http.StatusOK {
+		InternalError(w, s.logger, fmt.Errorf("ml вернул ошибку: %s", resp.Status))
+		return
+	}
+
+	// Чтение ответа
+	type MLResponse struct {
+		Answer *string `json:"answer"`
+	}
+	var mlResponse MLResponse
+
+	if err := json.NewDecoder(resp.Body).Decode(&mlResponse); err != nil {
+		InternalError(w, s.logger, fmt.Errorf("не смог декодировать ответ ML: %w", err))
+		return
+	}
+
+	// Обработка null-значения
+	response := struct {
 		Status string `json:"status"`
 		Text   string `json:"text"`
-	}
-
-	response := Response{
+	}{
 		Status: "ok",
-		Text:   request.Text,
+		Text:   "",
 	}
 
+	if mlResponse.Answer != nil {
+		response.Text = *mlResponse.Answer
+	}
+
+	// Возвращаем JSON клиенту
 	writeJSON(w, http.StatusOK, &response)
 }

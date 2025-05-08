@@ -21,7 +21,7 @@ services:
     environment:
       - POSTGRES_CONN=postgres://user:password@db:5432/mydb?sslmode=disable
       - JWT_SECRET=mydevelopmentsecret
-      - ML_URL=http://localhost:8080
+      - ML_URL=http://localhost:9000
 
 volumes:
   pgdata:

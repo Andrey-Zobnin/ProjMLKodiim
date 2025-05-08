@@ -36,6 +36,12 @@ func main() {
 		logger.Warn("using hardcoded SERVER_ADDRESS for development")
 	}
 
+	var mlURL = os.Getenv("ML_URL")
+	if mlURL == "" {
+		mlURL = "localhost:9000"
+		logger.Warn("using hardcoded ML_URL for development")
+	}
+
 	secret := os.Getenv("RANDOM_SECRET")
 	if secret == "" {
 		secret = "mydevelopmentsecret"
